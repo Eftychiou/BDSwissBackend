@@ -1,8 +1,9 @@
 import express from "express";
+import cors from "cors";
 
-import User from "./models/User";
 import { Messages } from "./interface/Messages";
 import DatabaseDriver from "./models/DatabaseDriver";
+import User from "./models/User";
 
 const app = express();
 const port = 4000;
@@ -11,9 +12,10 @@ const database = new DatabaseDriver()
   .setFilePath("database")
   .initializeDatabase();
 
+app.use(cors());
 app.use(express.json());
 
-app.get("/", async (req, res) => {
+app.get("/", async (_req, res) => {
   res.json(await database.getUsers());
 });
 
@@ -50,7 +52,7 @@ app.post("/login", (req, res) => {
     .catch((err) => console.log(err));
 });
 
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({ message: Messages.ROUTE_NOT_FOUND });
 });
 

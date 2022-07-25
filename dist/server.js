@@ -13,32 +13,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const User_1 = __importDefault(require("./models/User"));
+const cors_1 = __importDefault(require("cors"));
+const Messages_1 = require("./interface/Messages");
 const DatabaseDriver_1 = __importDefault(require("./models/DatabaseDriver"));
+const User_1 = __importDefault(require("./models/User"));
 const app = (0, express_1.default)();
 const port = 4000;
 const database = new DatabaseDriver_1.default()
     .setFilePath("database")
     .initializeDatabase();
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/", (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.json(yield database.getUsers());
 }));
 app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, fullName } = req.body;
     const user = new User_1.default(email, password, fullName);
     if (user.isMissingProperties())
-        return res.status(400).json({ message: "Missing Credentials" });
+        return res.status(400).json({ message: Messages_1.Messages.BAD_REQUEST });
     if (!user.isValidated())
         return res.status(400).json({
-            message: "Password needs to be minimum 8 characters, contained at least 1 letter and 1 number and full name minimum 5 characters long",
+            message: Messages_1.Messages.REGISTER_REQUIREMENTS,
         });
     const userAlreadyRegistered = yield database.allreadyRegistered(user);
     if (userAlreadyRegistered)
-        return res.status(400).json({ message: "This user is already registered" });
+        return res.status(400).json({ message: Messages_1.Messages.ALLREADY_REGISTERED });
     database.addUser(user);
     database.save();
-    res.status(201).json({ message: "Register Complete" });
+    res.status(201).json({ message: Messages_1.Messages.REGISTER_COMPLETE });
 }));
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
@@ -46,19 +49,21 @@ app.post("/login", (req, res) => {
         .findUser(email)
         .then((user) => {
         if (!user)
-            return res.status(400).json({ message: "This email doesn't exist" });
+            return res.status(400).json({ message: Messages_1.Messages.USER_NOT_REGISTERED });
+        if (user.getPassword() !== password)
+            return res.status(403).json({ message: Messages_1.Messages.NOT_AUTHENTICATED });
         res
             .status(201)
             .json({ email: user.getEmail(), fullName: user.getFullName() });
     })
         .catch((err) => console.log(err));
 });
-app.use((req, res) => {
-    res.status(404).json({ message: "Could not find this route" });
+app.use((_req, res) => {
+    res.status(404).json({ message: Messages_1.Messages.ROUTE_NOT_FOUND });
 });
 app.use((error, _req, res, _next) => {
     console.log(error);
-    res.status(500).json({ message: "Something Went Wrong" });
+    res.status(500).json({ message: Messages_1.Messages.INTERNAL_ERROR });
 });
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);

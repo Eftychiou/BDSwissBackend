@@ -19,19 +19,6 @@ export default class DatabaseDriver implements IDatabaseDriver {
     return this;
   }
 
-  getFilePath() {
-    return this.filePath;
-  }
-
-  setFilePath(databaseName) {
-    const databasePath: string = path.join(
-      process.cwd(),
-      `${databaseName}.json`
-    );
-    this.filePath = databasePath;
-    return this;
-  }
-
   save() {
     fs.writeFile(this.filePath, JSON.stringify(this.data), (err) => {
       if (err) return console.log(err);
@@ -51,15 +38,6 @@ export default class DatabaseDriver implements IDatabaseDriver {
     }
   }
 
-  async getUsers() {
-    await this.updateDriver();
-    return Promise.resolve(this.data.userList);
-  }
-
-  addUser(user) {
-    this.data.userList.push(user);
-  }
-
   async allreadyRegistered(user) {
     await this.updateDriver();
     const userList = await this.getUsers();
@@ -76,5 +54,27 @@ export default class DatabaseDriver implements IDatabaseDriver {
       (user) => user.getEmail() === email.toString()
     );
     return Promise.resolve(user);
+  }
+
+  getFilePath() {
+    return this.filePath;
+  }
+
+  setFilePath(databaseName) {
+    const databasePath: string = path.join(
+      process.cwd(),
+      `${databaseName}.json`
+    );
+    this.filePath = databasePath;
+    return this;
+  }
+
+  async getUsers() {
+    await this.updateDriver();
+    return Promise.resolve(this.data.userList);
+  }
+
+  addUser(user) {
+    this.data.userList.push(user);
   }
 }

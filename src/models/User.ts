@@ -9,18 +9,6 @@ export default class User implements IUser {
     this.password = password;
     this.fullName = fullName;
   }
-  setEmail(email) {
-    this.email = email;
-  }
-  getEmail() {
-    return this.email;
-  }
-  getFullName() {
-    return this.fullName;
-  }
-  getPassword() {
-    return this.password;
-  }
 
   isMissingProperties() {
     if (!this.email || !this.password || !this.fullName) return true;
@@ -41,5 +29,16 @@ export default class User implements IUser {
       return true;
     return false;
   }
+  setEmail(email) {
+    this.email = email;
+  }
+  getEmail() {
+    return this.email;
+  }
+  getFullName() {
+    return this.fullName;
+  }
+  getPassword() {
+    return this.password;
+  }
 }
-//
